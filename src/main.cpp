@@ -1,13 +1,14 @@
 #include <iostream>
+#include <vector>
+#include <cmath>
+#include <unistd.h>
+
 #include "SDL.h"
 #include "SDLauxiliary.h"
-
 
 #include <glm/glm.hpp>
 
 #include "tile.h"
-#include <vector>
-#include <cmath>
 #include "rng_utility.h"
 #include "l_system.h"
 #include "road_network.h"
@@ -33,11 +34,37 @@ void display_map(SDL_Surface* screen, Tile map[MAP_SIZE][MAP_SIZE]);
 void generate_partial_network(vector<ivec2> positions, Road_Network &network, int road_size);
 void main_algorithm(int sub_square_size, Road_Network &network);
 
-int main()
+int main(int argc, char** argv)
 {
+    string density_map_path = "dmap.png";
+    string height_map_path  = "hmap.png";
+
+    cout << "Program " << argv[0] << endl;
+    if(argc <= 1){
+        cout << "Using default map paths " << endl;
+    }
+
+    int opt;
+    while ( (opt = getopt(argc, argv, "d:h:")) != -1 ) {
+        switch ( opt ) {
+            case 'd':
+                density_map_path = optarg;
+                break;
+            case 'h':
+                height_map_path = optarg;
+                break;
+            case '?':
+                    cerr << "Only use -d <density map path> or -h <heigh map path>. Option " << char(optopt) << " is not recognised." << endl;
+                break;
+        }
+    }
+
+    cout << "density map: " << density_map_path << endl;
+    cout << "height map:  " << height_map_path  << endl;
+
     screen = InitializeSDL( MAP_SIZE, MAP_SIZE );
 
-    readPng(map, "dmap.png", "hmap.png");
+    readPng(map, density_map_path.c_str(), height_map_path.c_str());
 
     //Starting position correspond to an entrance point of the city.
     ivec2 start_position(0, 350);
