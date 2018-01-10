@@ -25,19 +25,22 @@ const int min_seg_length = 25;
 const int max_seg_length = 40;
 const int max_road_size = 4;
 
-//Algorithm parameters
-const int sub_square_size = 50;
-const double max_distance = 30;
+//Algorithm parameters (in pixel)
+const int DEFAULT_SUB_SQUARE_SIZE = 50;
+const double DEFAULT_MAX_DISTANCE = 30;
 
 // ***** FUNCTION DECLARATION *****
 void display_map(SDL_Surface* screen, Tile map[MAP_SIZE][MAP_SIZE]);
-void generate_partial_network(vector<ivec2> positions, Road_Network &network, int road_size);
-void main_algorithm(int sub_square_size, Road_Network &network);
+void generate_partial_network(vector<ivec2> positions, Road_Network &network, int road_size, const double max_distance);
+void main_algorithm(int sub_square_size, Road_Network &network, const double max_distance);
 
 int main(int argc, char** argv)
 {
     string density_map_path = "../maps/density/dmap.png";
     string height_map_path  = "../maps/height/hmap.png";
+
+    int sub_square_size = DEFAULT_SUB_SQUARE_SIZE;
+    double max_distance = DEFAULT_MAX_DISTANCE;
 
     cout << "Program " << argv[0] << endl;
     if(argc <= 1){
@@ -45,7 +48,8 @@ int main(int argc, char** argv)
     }
 
     int opt;
-    while ( (opt = getopt(argc, argv, "d:h:")) != -1 ) {
+    uintmax_t num;
+    while ( (opt = getopt(argc, argv, "d:h:s:m:")) != -1 ) {
         switch ( opt ) {
             case 'd':
                 density_map_path = optarg;
@@ -53,14 +57,28 @@ int main(int argc, char** argv)
             case 'h':
                 height_map_path = optarg;
                 break;
+            case 's':
+                num = strtoumax(optarg, NULL, 10);
+                if (num == UINTMAX_MAX && errno == ERANGE){
+                    cerr << "Error, -s cannot parse the specified number.." << endl;
+                    exit(0);
+                }
+                sub_square_size = (int) num;
+                break;
+            case 'm':
+                sscanf(optarg, "%lf", &max_distance);
+                break;
             case '?':
-                    cerr << "Only use -d <density map path> or -h <heigh map path>. Option " << char(optopt) << " is not recognised." << endl;
+                cerr << "Only use -d <density map path> or -h <heigh map path>. Option " << char(optopt) << " is not recognised." << endl;
+                exit(0);
                 break;
         }
     }
 
     cout << "density map: " << density_map_path << endl;
-    cout << "height map:  " << height_map_path  << endl;
+    cout << "height map:  " << height_map_path << endl;
+    cout << "sub_square_size:  " << sub_square_size << endl;
+    cout << "max_distance :  " << max_distance << endl;
 
     screen = InitializeSDL( MAP_SIZE, MAP_SIZE );
 
@@ -75,7 +93,7 @@ int main(int argc, char** argv)
 
     Road_Network network(n,(min_seg_length+max_seg_length)/4);
 
-    main_algorithm(sub_square_size ,network);
+    main_algorithm(sub_square_size, network, max_distance);
 
     network.mark_road_network(map);
 
@@ -123,7 +141,7 @@ void display_map(SDL_Surface* screen, Tile map[MAP_SIZE][MAP_SIZE]){
  * @param network
  * @param road_size
  */
-void generate_partial_network(vector<ivec2> positions, Road_Network &network,int road_size){
+void generate_partial_network(vector<ivec2> positions, Road_Network &network, int road_size, const double max_distance){
 
     for (unsigned int i = 0; i < positions.size(); ++i) {
         ivec2 end = positions[i];
@@ -160,7 +178,7 @@ void generate_partial_network(vector<ivec2> positions, Road_Network &network,int
  * @param sub_square_size
  * @param network
  */
-void main_algorithm(int sub_square_size, Road_Network &network){
+void main_algorithm(int sub_square_size, Road_Network &network, const double max_distance){
     vector<pair<ivec2, double> > s_map = get_subdivided_map(map, sub_square_size);
     double max_pop = s_map[0].second;
 
@@ -175,7 +193,7 @@ void main_algorithm(int sub_square_size, Road_Network &network){
             i++;
         }
 
-        generate_partial_network(positions,network,size);
+        generate_partial_network(positions, network, size, max_distance);
         positions.clear();
         percent -= 0.2;
     }

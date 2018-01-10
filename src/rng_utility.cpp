@@ -152,7 +152,7 @@ void mark_base_square(Tile map[MAP_SIZE][MAP_SIZE], glm::ivec2 start, glm::ivec2
  * @brief find_angle: Find the angle between two given vectors
  * @param start
  * @param end
- * @return the ngle in degree
+ * @return the angle in degree
  */
 double find_angle(glm::ivec2 start, glm::ivec2 end){
 
@@ -260,10 +260,8 @@ void readPng(Tile map[MAP_SIZE][MAP_SIZE], const char* densityFile, const char* 
         return;
     }
 
-
     double maxDensity = -1, minDensity = 300;
     double maxHeight = -1, minHeight = 300;
-
 
     //Normalisation of the values
     for (i = 0; i + 1 - 1 < h; i++){
@@ -314,15 +312,11 @@ void readPng(Tile map[MAP_SIZE][MAP_SIZE], const char* densityFile, const char* 
 void writeToPng(Tile map[MAP_SIZE][MAP_SIZE], const char* outputName){
     unsigned int width = MAP_SIZE, height = MAP_SIZE;
 
-    //Initialization of the array containing the image
+    //Initialization of the array containing the image (4 bytes per pixel: a, r, g, b
     unsigned char* mapImage = (unsigned char*) malloc(width*height*4);
 
-    //Red
-    int r;
-    //Green
-    int g;
-    //Blue
-    int b;
+    //Red Green Blue
+    int r, g, b;
     //Maximum alpha
     int a = 255;
     int luminosity = 250;
@@ -344,7 +338,6 @@ void writeToPng(Tile map[MAP_SIZE][MAP_SIZE], const char* outputName){
                 g = t.density*luminosity;
                 b = 0.5*luminosity;
             }
-
 
             mapImage[4 * y * width + 4 * x + 0] = r;
             mapImage[4 * y * width + 4 * x + 1] = g;
@@ -372,12 +365,13 @@ pair<glm::ivec2, double> get_average_pop(Tile map[MAP_SIZE][MAP_SIZE], glm::ivec
     double w = width / 2;
     double h = height / 2;
 
+    // Get the point at the middle of the square
     ivec2 center = left_top + ivec2(w,h);
 
     double total = 0;
     double nb_tile = 0;
 
-    //Loop for all the tiles of map to find the average population in the corresponding square
+    // Loop for all the tiles of map to find the average population in the corresponding square
     for (int x = left_top.x; x < left_top.x+width; ++x) {
         for (int y = left_top.y; y < left_top.y+height; ++y) {
             total += map[x][y].density;
@@ -391,7 +385,7 @@ pair<glm::ivec2, double> get_average_pop(Tile map[MAP_SIZE][MAP_SIZE], glm::ivec
 /**
  * @brief get_subdivided_map: Break the map into chunks to know where the population is situated.
  * @param map
- * @param square_size
+ * @param square_size: define the granularity
  * @return
  */
 vector<pair<glm::ivec2, double> > get_subdivided_map(Tile map[MAP_SIZE][MAP_SIZE], int square_size)
@@ -400,22 +394,27 @@ vector<pair<glm::ivec2, double> > get_subdivided_map(Tile map[MAP_SIZE][MAP_SIZE
 
     for (int x = 0; x < MAP_SIZE; x += square_size) {
         for (int y = 0; y < MAP_SIZE; y += square_size) {
+            // If we are at the end of the map.. 
             if((x+square_size) < MAP_SIZE && (y+square_size) < MAP_SIZE){
                 result.push_back(get_average_pop(map,ivec2(x,y),square_size, square_size));
             }else{
 
+                // We might need to adjust the size of the square if the size of the map is not
+                // a multiple of a square size
                 int width = square_size;
                 int heigth = square_size;
 
+                // If we are touching the X boarder
                 if((x+square_size) >= MAP_SIZE){
-                    width = MAP_SIZE - x -1;
+                    width = MAP_SIZE - x - 1;
                 }
 
+                // If we are touching the Y boarder
                 if((y+square_size) >= MAP_SIZE){
-                    heigth = MAP_SIZE - y -1;
+                    heigth = MAP_SIZE - y - 1;
                 }
 
-                result.push_back(get_average_pop(map,ivec2(x,y),width, heigth));
+                result.push_back(get_average_pop(map,ivec2(x,y), width, heigth));
 
             }
         }
