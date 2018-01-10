@@ -36,8 +36,8 @@ void main_algorithm(int sub_square_size, Road_Network &network);
 
 int main(int argc, char** argv)
 {
-    string density_map_path = "dmap.png";
-    string height_map_path  = "hmap.png";
+    string density_map_path = "../maps/density/dmap.png";
+    string height_map_path  = "../maps/height/hmap.png";
 
     cout << "Program " << argv[0] << endl;
     if(argc <= 1){

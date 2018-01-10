@@ -1,6 +1,5 @@
-MAKEFILE      = Makefile
-
-VPATH = ../src/
+PATH_TO_SRC = ../src
+VPATH = $(PATH_TO_SRC)
 
 ####### Compiler, tools and options
 TARGET        = road-generation		
@@ -9,31 +8,27 @@ CXX           = g++
 DEFINES       = -D_GNU_SOURCE=1 -D_REENTRANT
 CFLAGS        = -m64 -pipe -O2 -Wall -W -fPIE $(DEFINES)
 CXXFLAGS      = -m64 -pipe -O2 -std=c++0x -Wall -W -fPIE $(DEFINES)
-INCPATH       = -I../src -I../src/glm -I/usr/include/SDL
+INCPATH       = -I$(PATH_TO_SRC) -I$(PATH_TO_SRC)/glm -I/usr/include/SDL
 LINK          = g++
 LFLAGS        = -m64 -Wl,-O1
 LIBS          = $(SUBLIBS) -lSDL
 
-####### Output directory
-
-OBJECTS_DIR   = ./
-
 ####### Files
 
-SOURCES       = main.cpp \
+SOURCES = main.cpp \
 		tile.cpp \
 		l_element.cpp \
 		rng_utility.cpp \
 		l_system.cpp \
 		road_network.cpp 
-OBJECTS       = main.o \
+OBJECTS = main.o \
 		tile.o \
 		l_element.o \
 		rng_utility.o \
 		l_system.o \
 		road_network.o
 
-GLM_SOURCES   = glm/glm/core/_fixes.hpp \
+GLM_SOURCES = glm/glm/core/_fixes.hpp \
 		glm/glm/core/setup.hpp \
 		glm/glm/core/_detail.hpp \
 		glm/glm/core/type.hpp \
@@ -98,7 +93,7 @@ GLM_SOURCES   = glm/glm/core/_fixes.hpp \
 .SUFFIXES: .o .c .cpp .cc .cxx .C
 
 .cpp.o:
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o "$@" "$<"
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o "$(OBJECTS_DIR)/$@" "$<"
 
 .cc.o:
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o "$@" "$<"
