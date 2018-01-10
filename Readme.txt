@@ -1,12 +1,10 @@
-The program can be launch directly on linux by double clicking on road-network-generator.
+The program has been tested on Ubuntu 16.04.
 
-To compile the program from the source code you need to use qmake:
+Install SDL library: sudo apt-get install libsdl1.2-dev
 
-	-Move to the Source_code folder: 
-	-Execute: qmake road-network-generator.pro
-	-Execute: make
-	-Run the program: ./road-network-generator
+To compile the program from source, go into compile/ and use the Makefile.
 
-If you get a windows with a blue background it is probably because the heightmap (hmap.png) and the density map (dmap.png) are note in the same folder as the executable file.
+If you get a blue background window it is probably because the heightmap
+(hmap.png) and the density map (dmap.png) are not in the same folder as the binary.
 	
 	
